@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 '''
-19.01.2017-14:20:31	rg ¯\_(ツ)_/¯
-result = fzf.fuzz(query, input_path='path/to/file.txt')
+Commandline script that helps you to stay healthy while working on a computer.
+Reminds you to take breaks and do exercises.
+
+usage:
+./shell_fit --task="a task I'm working on" --project="the project the task belongs to"
 '''
 from os.path import expanduser
 from datetime import datetime
