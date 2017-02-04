@@ -15,9 +15,9 @@ import click
 
 
 @click.command()
-@click.option('--task', default='¯\_(ツ)_/¯', help='Number of greetings.')
+@click.option('--task', default='¯\_(ツ)_/¯', help='The task you\'re working on.')
 @click.option('--project',
-              help='The project you\'re working on. Think of it as a kind of tag.')
+              help='The project you\'re working on. Think of it as a tag.')
 def log(task, project):
     ''''''
     sf = ShellFit()
@@ -25,61 +25,77 @@ def log(task, project):
 
 
 class ShellFit(object):
+    ''' write work and break entries to a file,
+        notify when it is time for a break,
+        suggest break exercises
+    '''
     def __init__(self):
         self.history_file = expanduser(settings.history_file)
         self.exercises_file = expanduser(settings.exercises_file)
         self.work_time = settings.work_time * 60
 
-    def write(self, msg):
-        timestamp = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
-        timestamped_msg = '{}\t{}\n'.format(timestamp, msg)
-        with open(self.history_file, 'a') as hf:
-            hf.write(timestamped_msg)
-        print(timestamped_msg)
-
     def log(self, task, project):
+        ''' orchestrate what the class does
+        '''
         task_msg = '{}\t{}'.format(project, task)
         self.write(task_msg)
 
-        self.progressbar(' 🐚 💪', self.work_time)
+        self.progressbar(self.work_time, prefix=' 🐚 💪')
         self.notify(task)
         exercise = self.select()
         print('\n')
         break_msg = '{}\t{}'.format('break', exercise)
         self.write(break_msg)
 
+    def write(self, msg):
+        ''' write work and break entries to a file
+            format:
+            04.02.2017 14:04:20	a pj	a task
+        '''
+        timestamp = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+        timestamped_msg = '{}\t{}\n'.format(timestamp, msg)
+        with open(self.history_file, 'a') as hf:
+            hf.write(timestamped_msg)
+        print(timestamped_msg)
+
+    def notify(self, msg):
+        ''' use applescript to display a notification
+        '''
+        osascript_params = {
+                            'title': 'shell-fit',
+                            'subtitle': 'time for a break',
+                            'soundname': 'Hero',
+                            'notification': msg
+                           }
+        osascript_cmd = '\'display notification \"{notification}\" with title \"{title}\" subtitle \"{subtitle}\" sound name \"{soundname}\"\''.format(**osascript_params)
+        cmd = 'osascript -e {}'.format(osascript_cmd)
+        run(cmd, shell=True, check=True)
+
     def select(self):
+        ''' use fzf to select a break exercise from a file
+        '''
         cmd = 'cat {}|fzf'.format(self.exercises_file)
         # selection = run(['cat', self.exercises_file, '|', 'fzf'], shell=True, check=True, stdout=PIPE)
         selection = run(cmd, shell=True, check=True, stdout=PIPE)
         return selection.stdout.decode('utf-8')
 
-    def countdown(self, timeout):
-        while timeout:
-            mins, secs = divmod(timeout, 60)
-            timeformat = '{:02d}:{:02d}'.format(mins, secs)
-            print(timeformat, end='\r')
-            sleep(1)
-            timeout -= 1
-
-    def progressbar(self, task, seconds):
-        # Print iterations progress
-        def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill= '█'):
+    def progressbar(self, seconds, prefix='', suffix=''):
+        ''' render a progressbar on the commandline
+        '''
+        def print_progressbar(iteration, total, decimals=1, length=100, fill='█'):
             """
             Call in a loop to create terminal progress bar
             @params:
                 iteration   - Required  : current iteration (Int)
                 total       - Required  : total iterations (Int)
-                prefix      - Optional  : prefix string (Str)
-                suffix      - Optional  : suffix string (Str)
                 decimals    - Optional  : positive number of decimals in percent complete (Int)
                 length      - Optional  : character length of bar (Int)
                 fill        - Optional  : bar fill character (Str)
             """
             percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-            filledLength = int(length * iteration // total)
-            bar = fill * filledLength + '-' * (length - filledLength)
-            print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+            filled_length = int(length * iteration // total)
+            bar = fill * filled_length + '-' * (length - filled_length)
+            print('\r{} |{}| {}%% {}'.format(prefix, bar, percent, suffix), end='\r')
             # Print New Line on Complete
             if iteration == total:
                 print()
@@ -90,28 +106,17 @@ class ShellFit(object):
         l = len(items)
 
         # Initial call to print 0% progress
-        printProgressBar(i, l, prefix=task, suffix='', length=50)
+        print_progressbar(i, l, length=50)
         for item in items:
-            # Do stuff...
+            # do stuff...
             sleep(1)
-            # Update Progress Bar
+            # update progressbar
             i += 1
             seconds_left = l - i
             mins, secs = divmod(seconds_left, 60)
-            timeformat = '{:02d}:{:02d}'.format(mins, secs)
+            suffix = '{:02d}:{:02d}'.format(mins, secs)
 
-            printProgressBar(i, l, prefix=task, suffix=timeformat, length=50)
-
-    def notify(self, msg):
-        osascript_params = {
-                            'title': 'shell-fit',
-                            'subtitle': 'time for a break',
-                            'soundname': 'Hero',
-                            'notification': msg
-                           }
-        osascript_cmd = '\'display notification \"{notification}\" with title \"{title}\" subtitle \"{subtitle}\" sound name \"{soundname}\"\''.format(**osascript_params)
-        cmd = 'osascript -e {}'.format(osascript_cmd)
-        run(cmd, shell=True, check=True)
+            print_progressbar(i, l, length=50)
 
 
 if __name__ == '__main__':
