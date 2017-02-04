@@ -11,6 +11,8 @@ Think of [[http://cirillocompany.de/pages/pomodoro-technique][pomodoro]] but wit
 
 * installation
 #+begin_src sh
+# maybe venv first
+mkvirtualenv --python=/usr/local/bin/python3.5-32 shell-fit
 pip install -r requirements.txt       # just click
 #+end_src
 
@@ -18,5 +20,5 @@ provide a text file (default: ~/.shell-fit-exercises) with an exercise per line
 
 * usage:
 #+begin_src sh 
-./shell_fit --task="a task you're working on" --project="the project the task belongs to"
+./shell_fit.py --task="a task you're working on" --project="the project the task belongs to"
 #+end_src
