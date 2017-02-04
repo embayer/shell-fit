@@ -1,3 +1,3 @@
-history_file = '~/.pomodoro'
-exercises_file = '~/.pomodoro-exercises'
-work_time = 1
+history_file = '~/.shell-fit'
+exercises_file = '~/.shell-fit-exercises'
+work_time = 25
