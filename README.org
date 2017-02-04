@@ -1,0 +1,20 @@
+#+TITLE: shell-fit 🐚 💪
+
+Commandline script that helps you to stay healthy while working on a computer.
+Reminds you to take breaks and do exercises.
+Think of [[http://cirillocompany.de/pages/pomodoro-technique][pomodoro]] but with fitness exercises.
+
+* requirements
+- Python >= 3.5 (because of subprocess.run)
+- macOS (because of Applescript notifications)
+- terminalemulator which can display emojis
+
+* installation
+#+begin_src sh
+pip install -r requirements.txt       # just click
+#+end_src
+
+provide a text file (default: ~/.shell-fit-exercises) with an exercise per line
+
+* usage:
+./shell_fit --task="a task you're working on" --project="the project the task belongs to"
