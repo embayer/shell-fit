@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 '''
 Commandline script that helps you to stay healthy while working on a computer.
@@ -17,15 +18,28 @@ import settings
 import click
 
 
+@click.group()
+def cli():
+    """ command container """
+    pass
+
 @click.command()
-@click.option('--task', default='¯\_(ツ)_/¯', help='The task you\'re working on.')
-@click.option('--project',
+@click.option('--task', default='---', help='The task you\'re working on.')
+@click.option('--project', default='---',
               help='The project you\'re working on. Think of it as a tag.')
 def log(task, project):
     ''''''
     sf = ShellFit()
     sf.log(task, project)
 
+
+@click.command()
+def exercise():
+    sf = ShellFit()
+    sf.exercise()
+
+cli.add_command(log)
+cli.add_command(exercise)
 
 class ShellFit(object):
     ''' write work and break entries to a file,
@@ -37,18 +51,21 @@ class ShellFit(object):
         self.exercises_file = expanduser(settings.exercises_file)
         self.work_time = settings.work_time * 60
 
+    def exercise(self):
+        exercise = self.select()
+        print('\n')
+        break_msg = '{}\t{}'.format('break', exercise)
+        self.write(break_msg)
+        
     def log(self, task, project):
         ''' orchestrate what the class does
         '''
         task_msg = '{}\t{}'.format(project, task)
         self.write(task_msg)
 
-        self.progressbar(self.work_time, prefix=' 🐚 💪')
+        self.progressbar(self.work_time, prefix='')
         self.notify(task)
-        exercise = self.select()
-        print('\n')
-        break_msg = '{}\t{}'.format('break', exercise)
-        self.write(break_msg)
+        self.exercise()
 
     def write(self, msg):
         ''' write work and break entries to a file
@@ -98,7 +115,7 @@ class ShellFit(object):
             percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
             filled_length = int(length * iteration // total)
             bar = fill * filled_length + '-' * (length - filled_length)
-            print('\r{} |{}| {}%% {}'.format(prefix, bar, percent, suffix), end='\r')
+            print('\r{} |{}| {}% {}'.format(prefix, bar, percent, suffix), end='\r')
             # Print New Line on Complete
             if iteration == total:
                 print()
@@ -123,4 +140,4 @@ class ShellFit(object):
 
 
 if __name__ == '__main__':
-    log()
+    cli()
