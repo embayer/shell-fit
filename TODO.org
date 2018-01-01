@@ -1,0 +1,11 @@
+* break cmd
+shell_fit break --...
+
+* breaks with topics (Dehnen, Kraft, ...)
+
+* Bürogeeignete breaks
+
+* reports
+- units per day, week, month, year, total, project
+- break chart
+- nach jeder einheit timedelta, einheiten an diesem tag

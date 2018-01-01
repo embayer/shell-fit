@@ -7,6 +7,10 @@ Reminds you to take breaks and do exercises.
 
 usage:
 ./shell_fit --task="a task I'm working on" --project="the project the task belongs to"
+
+TODO:
+    check break length
+    break step
 '''
 from os.path import expanduser
 from datetime import datetime
@@ -27,10 +31,10 @@ def cli():
 @click.option('--task', default='---', help='The task you\'re working on.')
 @click.option('--project', default='---',
               help='The project you\'re working on. Think of it as a tag.')
-def log(task, project):
+def work(task, project):
     ''''''
     sf = ShellFit()
-    sf.log(task, project)
+    sf.work(task, project)
 
 
 @click.command()
@@ -38,8 +42,16 @@ def exercise():
     sf = ShellFit()
     sf.exercise()
 
-cli.add_command(log)
+
+@click.option('--interval', default='today', help='Filter the log for the given interval.')
+@click.command()
+def report(interval):
+    sf = ShellFit()
+    sf.report(interval)
+
+cli.add_command(work)
 cli.add_command(exercise)
+cli.add_command(report)
 
 class ShellFit(object):
     ''' write work and break entries to a file,
@@ -51,13 +63,28 @@ class ShellFit(object):
         self.exercises_file = expanduser(settings.exercises_file)
         self.work_time = settings.work_time * 60
 
+    def report(self, interval):
+        """
+        TODO: work only, break only, intervals
+        """
+        def filter_today():
+            pass
+        if interval == 'today':
+            timestamp = datetime.now().strftime('%d.%m.%Y')
+            with open(self.history_file, 'r') as history_file:
+                for line in history_file:
+                    if line.startswith(timestamp):
+                        print(line)
+        elif interval == 'week':
+            pass
+                
     def exercise(self):
         exercise = self.select()
         print('\n')
         break_msg = '{}\t{}'.format('break', exercise)
         self.write(break_msg)
         
-    def log(self, task, project):
+    def work(self, task, project):
         ''' orchestrate what the class does
         '''
         task_msg = '{}\t{}'.format(project, task)
